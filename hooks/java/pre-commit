@@ -1,0 +1,11 @@
+#!/bin/sh
+
+echo "*****Running tests******"
+
+./gradlew clean test
+
+status=$?
+
+echo "*****Done with tests******"
+
+exit $status

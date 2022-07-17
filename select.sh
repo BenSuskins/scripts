@@ -28,19 +28,14 @@ runScript() {
     ./scripts/docker/run.sh
     ;;
   6)
-    echo "Update Dev Tools"
+    echo "Update"
     echo
-    ./scripts/setup/update_all.sh
+    ./scripts/setup/update.sh
     ;;
   7)
-    echo "QA Release"
+    echo "Cleanup"
     echo
-    ./scripts/git/merge_develop.sh
-    ;;
-  8)
-    echo "GCloud Auth Token"
-    echo
-    ./scripts/gcp/token.sh
+    ./scripts/setup/Cleanup.sh
     ;;
   *)
     echo "$n is an unrecognised option"
@@ -56,9 +51,8 @@ if [ $# -eq 0 ]; then
   echo "3. Pull on current branch"
   echo "4. See Current Branch"
   echo "5. Run Docker"
-  echo "6. Update Dev Tools"
-  echo "7. Trigger QA Release"
-  echo "8. Print GCloud Auth Token"
+  echo "6. Update"
+  echo "7. Cleanup"
   echo "========================================================"
   printf "Select Option:"
 

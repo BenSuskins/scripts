@@ -35,7 +35,7 @@ runScript() {
   7)
     echo "Cleanup"
     echo
-    ./scripts/setup/Cleanup.sh
+    ./scripts/setup/cleanup.sh
     ;;
   *)
     echo "$n is an unrecognised option"

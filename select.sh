@@ -23,12 +23,12 @@ runScript() {
     ./scripts/git/branch.sh
     ;;
   5)
-    echo "Run Docker"
+    echo "Updating Docker Compose"
     echo
-    ./scripts/docker/run.sh
+    ./scripts/docker/update.sh
     ;;
   6)
-    echo "Update"
+    echo "Updating System"
     echo
     ./scripts/setup/update.sh
     ;;
@@ -50,8 +50,8 @@ if [ $# -eq 0 ]; then
   echo "2. Pull Develop"
   echo "3. Pull on current branch"
   echo "4. See Current Branch"
-  echo "5. Run Docker"
-  echo "6. Update"
+  echo "5. Update Docker Compose"
+  echo "6. Update System"
   echo "7. Cleanup"
   echo "========================================================"
   printf "Select Option:"

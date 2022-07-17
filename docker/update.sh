@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-for file in /Data/*.yml; do
+for file in *.yml; do
     docker-compose pull -f $file
     docker-compose restart -f $file
 done

@@ -1,5 +1,5 @@
 echo "Installing alias 'run'"
-echo 'alias run=/home/${USER}/scripts/run.sh' >> ~/.bashrc
+echo 'alias run=/home/'${USER}'/scripts/run.sh' >> ~/.bashrc
 
 echo "Setting permissions"
 chmod +x ./git

@@ -5,9 +5,9 @@ for d in */ ; do
       cd "$d"
       hasMasterBranch=`git show-ref refs/heads/master`
       if [ -n "$hasMasterBranch" ]; then
-            git co master && git pull
+            git checkout master && git pull
       else
-            git co main && git pull            
+            git checkout main && git pull            
       fi
       cd ..
 done

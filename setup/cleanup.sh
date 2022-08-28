@@ -215,3 +215,7 @@ fi
 echo "Cleaned up $counter elements."
 echo "     Current state:"
 sudo df -h /
+
+# Docker
+echo "Cleaning up Docker"
+docker system prune -a -f

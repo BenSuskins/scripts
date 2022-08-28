@@ -5,37 +5,37 @@ runScript() {
   1)
     echo "Pulling Master"
     echo
-    ./scripts/git/pull_master.sh
+    $HOME/scripts/git/pull_master.sh
     ;;
   2)
     echo "Pulling Develop"
     echo
-    ./scripts/git/pull_develop.sh
+    $HOME/scripts/git/pull_develop.sh
     ;;
   3)
     echo "Pulling All"
     echo
-    ./scripts/git/pull_all.sh
+    $HOME/scripts/git/pull_all.sh
     ;;
   4)
     echo "Showing Branches"
     echo
-    ./scripts/git/branch.sh
+    $HOME/scripts/git/branch.sh
     ;;
   5)
     echo "Updating Docker Compose"
     echo
-    ./scripts/docker/update.sh
+    $HOME/scripts/docker/update.sh
     ;;
   6)
     echo "Updating System"
     echo
-    ./scripts/setup/update.sh
+    $HOME/scripts/setup/update.sh
     ;;
   7)
     echo "Cleanup"
     echo
-    ./scripts/setup/cleanup.sh
+    $HOME/scripts/setup/cleanup.sh
     ;;
   *)
     echo "$n is an unrecognised option"

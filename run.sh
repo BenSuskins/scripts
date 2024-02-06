@@ -3,36 +3,21 @@
 runScript() {
   case $1 in
   1)
-    echo "Pulling Master"
-    echo
-    $HOME/scripts/git/pull_master.sh
-    ;;
-  2)
-    echo "Pulling Develop"
-    echo
-    $HOME/scripts/git/pull_develop.sh
-    ;;
-  3)
     echo "Pulling All"
     echo
     $HOME/scripts/git/pull_all.sh
     ;;
-  4)
-    echo "Showing Branches"
-    echo
-    $HOME/scripts/git/branch.sh
-    ;;
-  5)
+  2)
     echo "Updating Docker Compose"
     echo
     $HOME/scripts/docker/update.sh
     ;;
-  6)
+  3)
     echo "Updating System"
     echo
     $HOME/scripts/setup/update.sh
     ;;
-  7)
+  4)
     echo "Cleanup"
     echo
     $HOME/scripts/setup/cleanup.sh
@@ -46,13 +31,10 @@ runScript() {
 
 if [ $# -eq 0 ]; then
   echo "========================================================"
-  echo "1. Pull Master"
-  echo "2. Pull Develop"
-  echo "3. Pull on current branch"
-  echo "4. See Current Branch"
-  echo "5. Update Docker Compose"
-  echo "6. Update System"
-  echo "7. Cleanup"
+  echo "1. Pull on current branch"
+  echo "2. Update Docker Compose"
+  echo "3. Update System"
+  echo "4. Cleanup"
   echo "========================================================"
   printf "Select Option:"
 

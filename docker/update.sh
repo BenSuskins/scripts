@@ -5,7 +5,8 @@ for d in */ ; do
         echo ""
         echo "-- $file --"
         docker compose -f $file pull
-        docker compose -f $file restart
+        docker compose -f $file stop
+        docker compose -f $file start
     done
     cd ..
 done

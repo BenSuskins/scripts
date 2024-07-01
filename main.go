@@ -9,7 +9,11 @@ import (
 	"github.com/charmbracelet/lipgloss"
 )
 
-var docStyle = lipgloss.NewStyle().Margin(1, 2)
+var docStyle = lipgloss.NewStyle().
+	Margin(1, 2).
+    Bold(true).
+    PaddingTop(2).
+    PaddingLeft(4)
 
 type item struct {
 	title, desc string
@@ -79,13 +83,7 @@ func main() {
 func pullAll() {
 	fmt.Println("Executing: Pulling All")
 	// Your Go code to pull all
-}
-
-// Function to update Docker Compose (example implementation)
-func updateDockerCompose() {
-	fmt.Println("Executing: Updating Docker Compose")
-	// Your Go code to update Docker Compose
-}
+} 
 
 // Function to update the system (example implementation)
 func updateSystem() {

@@ -72,7 +72,6 @@ func (m model) View() string {
 var quitTextStyle = lipgloss.NewStyle().
 	Margin(1, 2).
 	Bold(true).
-	Foreground(lipgloss.Color("205")).
 	PaddingTop(1).
 	PaddingLeft(2)
 
@@ -88,9 +87,7 @@ func main() {
 	m := model{list: list.New(items, list.NewDefaultDelegate(), 0, 0)}
 	m.list.Title = "Scripts"
 
-	p := tea.NewProgram(m, tea.WithAltScreen())
-
-	if _, err := p.Run(); err != nil {
+	if _, err := tea.NewProgram(m).Run(); err != nil {
 		fmt.Println("Error running program:", err)
 		os.Exit(1)
 	}

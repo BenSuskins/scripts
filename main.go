@@ -61,7 +61,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 func (m model) View() string {
 	if m.choice != "" {
-		return quitTextStyle.Render(fmt.Sprintf("%s", m.choice))
+		return quitTextStyle.Render(fmt.Sprintf("You selected: %s", m.choice))
 	}
 	if m.quitting {
 		return quitTextStyle.Render("Have a good day!")

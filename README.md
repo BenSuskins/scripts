@@ -1,5 +1,20 @@
 # Scripts
 
-# References
+## How to run locally
 
-- https://spf13.com/presentation/building-an-awesome-cli-app-in-go-oscon/
+```shell
+go run .
+```
+
+## Tidy dependencies
+
+```shell
+go mod tidy
+```
+
+## Format
+
+```shell
+go fmt
+```
+

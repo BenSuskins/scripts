@@ -3,7 +3,7 @@
 ## How to run locally
 
 ```shell
-go run .
+go run ./cmd/scripts
 ```
 
 ## Tidy dependencies

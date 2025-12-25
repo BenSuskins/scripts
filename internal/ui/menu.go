@@ -21,12 +21,12 @@ func NewMenuItems() []list.Item {
 	return []list.Item{
 		MenuItem{
 			title:   "Show git branch",
-			desc:    "Display current branch for each repository",
+			desc:    "Show current branch for all repos",
 			command: "branch",
 		},
 		MenuItem{
 			title:   "Pull main",
-			desc:    "Pull from origin main for each repository",
+			desc:    "Pull main for all repos",
 			command: "pull",
 		},
 	}
@@ -36,7 +36,7 @@ func NewMenuItems() []list.Item {
 func NewMenuList(width, height int) list.Model {
 	items := NewMenuItems()
 	l := list.New(items, list.NewDefaultDelegate(), width, height)
-	l.Title = "Git Operations"
+	l.Title = "Scripts"
 	l.SetShowStatusBar(false)
 	l.SetFilteringEnabled(false)
 	l.SetShowHelp(true)

@@ -219,8 +219,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 func (m Model) View() string {
 	switch m.state {
 	case StateMenu:
-		info := HelpStyle.Render(fmt.Sprintf("Found %d git repositories", len(m.gitDirs)))
-		return m.menu.View() + "\n" + info
+		return m.menu.View()
 	case StateExecuting:
 		return m.renderExecuting()
 	case StateResults:
@@ -241,26 +240,18 @@ func (m Model) renderExecuting() string {
 			icon = ErrorStyle.Render("✗")
 		}
 		dirName := filepath.Base(r.Directory)
-		// Show output if: showOutput is true, OR command failed (always show errors)
-		if (m.selectedCmd.ShowOutput() || !r.Success) && r.Message != "" {
-			b.WriteString(fmt.Sprintf("%s %s: %s\n", icon, DirStyle.Render(dirName), r.Message))
-		} else {
-			b.WriteString(fmt.Sprintf("%s %s\n", icon, DirStyle.Render(dirName)))
+		b.WriteString(fmt.Sprintf("%s %s\n", icon, DirStyle.Render(dirName)))
+		// Show error message on new line, indented and grey
+		if !r.Success && r.Message != "" {
+			b.WriteString(fmt.Sprintf("    %s\n", HelpStyle.Render(r.Message)))
 		}
 	}
 
-	// For git_dirs type, show current and pending
+	// Show current repo with spinner (no pending list)
 	if m.selectedCmd.CmdType() == config.TypeGitDirs {
-		// Show current repo with spinner
 		if m.currentIdx < len(m.gitDirs) {
 			dirName := filepath.Base(m.gitDirs[m.currentIdx])
 			b.WriteString(fmt.Sprintf("%s %s\n", m.spinner.View(), dirName))
-		}
-
-		// Show pending repos
-		for i := m.currentIdx + 1; i < len(m.gitDirs); i++ {
-			dirName := filepath.Base(m.gitDirs[i])
-			b.WriteString(PendingStyle.Render(fmt.Sprintf("  %s", dirName)) + "\n")
 		}
 	} else {
 		// Single command: just show spinner
@@ -275,20 +266,28 @@ func (m Model) renderResults() string {
 
 	b.WriteString(TitleStyle.Render(m.selectedCmd.Title()) + "\n\n")
 
+	failCount := 0
 	for _, r := range m.results {
 		icon := SuccessStyle.Render("✓")
 		if !r.Success {
 			icon = ErrorStyle.Render("✗")
+			failCount++
 		}
 		dirName := filepath.Base(r.Directory)
-		// Show output if: showOutput is true, OR command failed (always show errors)
-		if (m.selectedCmd.ShowOutput() || !r.Success) && r.Message != "" {
-			b.WriteString(fmt.Sprintf("%s %s: %s\n", icon, DirStyle.Render(dirName), r.Message))
-		} else {
-			b.WriteString(fmt.Sprintf("%s %s\n", icon, DirStyle.Render(dirName)))
+		b.WriteString(fmt.Sprintf("%s %s\n", icon, DirStyle.Render(dirName)))
+		// Show error message on new line, indented and grey
+		if !r.Success && r.Message != "" {
+			b.WriteString(fmt.Sprintf("    %s\n", HelpStyle.Render(r.Message)))
 		}
 	}
 
-	b.WriteString("\n" + HelpStyle.Render("Press enter or q to exit"))
+	// Summary line
+	b.WriteString("\n")
+	if failCount > 0 {
+		b.WriteString(fmt.Sprintf("Done! Processed %d repos (%d failed)\n", len(m.results), failCount))
+	} else {
+		b.WriteString(fmt.Sprintf("Done! Processed %d repos\n", len(m.results)))
+	}
+	b.WriteString(HelpStyle.Render("Press enter or q to exit"))
 	return b.String()
 }

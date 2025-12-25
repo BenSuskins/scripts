@@ -10,6 +10,7 @@ import (
 	"github.com/charmbracelet/bubbles/spinner"
 	tea "github.com/charmbracelet/bubbletea"
 
+	"suskins/scripts/internal/config"
 	"suskins/scripts/internal/core"
 )
 
@@ -24,15 +25,15 @@ const (
 
 // Model is the main application model
 type Model struct {
-	state      AppState
-	menu       list.Model
-	spinner    spinner.Model
-	results    []core.OperationResult
-	gitDirs    []string
-	operation  string
-	currentIdx int
-	width      int
-	height     int
+	state       AppState
+	menu        list.Model
+	spinner     spinner.Model
+	results     []core.OperationResult
+	gitDirs     []string
+	selectedCmd MenuItem
+	currentIdx  int
+	width       int
+	height      int
 }
 
 // Messages
@@ -42,14 +43,14 @@ type singleResultMsg struct {
 }
 
 // NewModel creates the initial model
-func NewModel() Model {
+func NewModel(cfg *config.Config) Model {
 	s := spinner.New()
 	s.Spinner = spinner.Dot
 	s.Style = SpinnerStyle
 
 	return Model{
 		state:   StateMenu,
-		menu:    NewMenuList(80, 20),
+		menu:    NewMenuList(cfg, 80, 20),
 		spinner: s,
 		width:   80,
 		height:  24,
@@ -69,17 +70,9 @@ func scanGitDirs() tea.Msg {
 	return gitDirsMsg{dirs: dirs}
 }
 
-func executeNextOp(dir string, op string) tea.Cmd {
+func executeCommand(dir string, command string) tea.Cmd {
 	return func() tea.Msg {
-		var r core.OperationResult
-		switch op {
-		case "branch":
-			r = core.GetBranch(dir)
-		case "pull":
-			r = core.PullMain(dir)
-		default:
-			r = core.OperationResult{Directory: dir, Success: false, Message: "Unknown operation"}
-		}
+		r := core.RunCommand(dir, command)
 		return singleResultMsg{result: r}
 	}
 }
@@ -93,12 +86,20 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case "enter":
 			if m.state == StateMenu {
 				if item, ok := m.menu.SelectedItem().(MenuItem); ok {
-					m.operation = item.Command()
+					m.selectedCmd = item
 					m.state = StateExecuting
 					m.currentIdx = 0
 					m.results = nil
+
+					if item.CmdType() == config.TypeSingle {
+						// Single command: run once in cwd
+						cwd, _ := os.Getwd()
+						return m, executeCommand(cwd, item.Command())
+					}
+
+					// git_dirs: iterate over all git directories
 					if len(m.gitDirs) > 0 {
-						return m, executeNextOp(m.gitDirs[0], m.operation)
+						return m, executeCommand(m.gitDirs[0], item.Command())
 					}
 					m.state = StateResults
 					return m, nil
@@ -116,9 +117,17 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.gitDirs = msg.dirs
 	case singleResultMsg:
 		m.results = append(m.results, msg.result)
+
+		if m.selectedCmd.CmdType() == config.TypeSingle {
+			// Single command done
+			m.state = StateResults
+			return m, nil
+		}
+
+		// git_dirs: continue to next
 		m.currentIdx++
 		if m.currentIdx < len(m.gitDirs) {
-			return m, executeNextOp(m.gitDirs[m.currentIdx], m.operation)
+			return m, executeCommand(m.gitDirs[m.currentIdx], m.selectedCmd.Command())
 		}
 		m.state = StateResults
 		return m, nil
@@ -153,11 +162,7 @@ func (m Model) View() string {
 func (m Model) renderExecuting() string {
 	var b strings.Builder
 
-	opTitle := "Branch Status"
-	if m.operation == "pull" {
-		opTitle = "Pull Results"
-	}
-	b.WriteString(TitleStyle.Render(opTitle) + "\n\n")
+	b.WriteString(TitleStyle.Render(m.selectedCmd.Title()) + "\n\n")
 
 	// Show completed results
 	for _, r := range m.results {
@@ -166,26 +171,30 @@ func (m Model) renderExecuting() string {
 			icon = ErrorStyle.Render("✗")
 		}
 		dirName := filepath.Base(r.Directory)
-		if r.Message != "" {
+		// Show output if: showOutput is true, OR command failed (always show errors)
+		if (m.selectedCmd.ShowOutput() || !r.Success) && r.Message != "" {
 			b.WriteString(fmt.Sprintf("%s %s: %s\n", icon, DirStyle.Render(dirName), r.Message))
 		} else {
 			b.WriteString(fmt.Sprintf("%s %s\n", icon, DirStyle.Render(dirName)))
 		}
 	}
 
-	// Show current repo with spinner
-	if m.currentIdx < len(m.gitDirs) {
-		dirName := filepath.Base(m.gitDirs[m.currentIdx])
-		b.WriteString(fmt.Sprintf("%s %s\n",
-			m.spinner.View(),
-			dirName,
-		))
-	}
+	// For git_dirs type, show current and pending
+	if m.selectedCmd.CmdType() == config.TypeGitDirs {
+		// Show current repo with spinner
+		if m.currentIdx < len(m.gitDirs) {
+			dirName := filepath.Base(m.gitDirs[m.currentIdx])
+			b.WriteString(fmt.Sprintf("%s %s\n", m.spinner.View(), dirName))
+		}
 
-	// Show pending repos
-	for i := m.currentIdx + 1; i < len(m.gitDirs); i++ {
-		dirName := filepath.Base(m.gitDirs[i])
-		b.WriteString(PendingStyle.Render(fmt.Sprintf("  %s", dirName)) + "\n")
+		// Show pending repos
+		for i := m.currentIdx + 1; i < len(m.gitDirs); i++ {
+			dirName := filepath.Base(m.gitDirs[i])
+			b.WriteString(PendingStyle.Render(fmt.Sprintf("  %s", dirName)) + "\n")
+		}
+	} else {
+		// Single command: just show spinner
+		b.WriteString(fmt.Sprintf("%s Running...\n", m.spinner.View()))
 	}
 
 	return b.String()
@@ -194,11 +203,7 @@ func (m Model) renderExecuting() string {
 func (m Model) renderResults() string {
 	var b strings.Builder
 
-	opTitle := "Branch Status"
-	if m.operation == "pull" {
-		opTitle = "Pull Results"
-	}
-	b.WriteString(TitleStyle.Render(opTitle) + "\n\n")
+	b.WriteString(TitleStyle.Render(m.selectedCmd.Title()) + "\n\n")
 
 	for _, r := range m.results {
 		icon := SuccessStyle.Render("✓")
@@ -206,7 +211,8 @@ func (m Model) renderResults() string {
 			icon = ErrorStyle.Render("✗")
 		}
 		dirName := filepath.Base(r.Directory)
-		if r.Message != "" {
+		// Show output if: showOutput is true, OR command failed (always show errors)
+		if (m.selectedCmd.ShowOutput() || !r.Success) && r.Message != "" {
 			b.WriteString(fmt.Sprintf("%s %s: %s\n", icon, DirStyle.Render(dirName), r.Message))
 		} else {
 			b.WriteString(fmt.Sprintf("%s %s\n", icon, DirStyle.Render(dirName)))

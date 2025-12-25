@@ -234,16 +234,23 @@ func (m Model) View() string {
 	return ""
 }
 
-func renderResult(b *strings.Builder, r core.OperationResult) {
+func renderResult(b *strings.Builder, r core.OperationResult, showOutput bool) {
 	icon := SuccessStyle.Render("✓")
 	if !r.Success {
 		icon = ErrorStyle.Render("✗")
 	}
 	dirName := filepath.Base(r.Directory)
-	b.WriteString(fmt.Sprintf("%s %s\n", icon, DirStyle.Render(dirName)))
-	if !r.Success && r.Message != "" {
-		for _, line := range strings.Split(strings.TrimSpace(r.Message), "\n") {
-			b.WriteString(fmt.Sprintf("    %s\n", HelpStyle.Render(line)))
+
+	// Show output inline if: showOutput is true and success, or always on failure
+	if r.Success && showOutput && r.Message != "" {
+		b.WriteString(fmt.Sprintf("%s %s: %s\n", icon, DirStyle.Render(dirName), r.Message))
+	} else {
+		b.WriteString(fmt.Sprintf("%s %s\n", icon, DirStyle.Render(dirName)))
+		// Show error message on new line, indented and grey
+		if !r.Success && r.Message != "" {
+			for _, line := range strings.Split(strings.TrimSpace(r.Message), "\n") {
+				b.WriteString(fmt.Sprintf("    %s\n", HelpStyle.Render(line)))
+			}
 		}
 	}
 }
@@ -254,7 +261,7 @@ func (m Model) renderExecuting() string {
 	b.WriteString(TitleStyle.Render(m.selectedCmd.Title()) + "\n\n")
 
 	for _, r := range m.results {
-		renderResult(&b, r)
+		renderResult(&b, r, m.selectedCmd.ShowOutput())
 	}
 
 	// Show current repo with spinner
@@ -280,7 +287,7 @@ func (m Model) renderResults() string {
 		if !r.Success {
 			failCount++
 		}
-		renderResult(&b, r)
+		renderResult(&b, r, m.selectedCmd.ShowOutput())
 	}
 
 	// Summary line

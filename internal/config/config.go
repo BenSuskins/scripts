@@ -16,11 +16,11 @@ const (
 )
 
 type Command struct {
-	Name       string      `yaml:"name"`
-	Category   string      `yaml:"category"`
-	Command    string      `yaml:"command"`
-	Type       CommandType `yaml:"type"`
-	ShowOutput bool        `yaml:"show_output"`
+	Name        string      `yaml:"name"`
+	Description string      `yaml:"description"`
+	Command     string      `yaml:"command"`
+	Type        CommandType `yaml:"type"`
+	ShowOutput  bool        `yaml:"show_output"`
 }
 
 type Config struct {
@@ -30,18 +30,18 @@ type Config struct {
 var defaultConfig = Config{
 	Commands: []Command{
 		{
-			Name:       "Show git branch",
-			Category:   "Git",
-			Command:    "git rev-parse --abbrev-ref HEAD",
-			Type:       TypeGitDirs,
-			ShowOutput: true,
+			Name:        "Show git branch",
+			Description: "Display current branch for each repository",
+			Command:     "git rev-parse --abbrev-ref HEAD",
+			Type:        TypeGitDirs,
+			ShowOutput:  true,
 		},
 		{
-			Name:       "Pull main",
-			Category:   "Git",
-			Command:    "git pull origin main",
-			Type:       TypeGitDirs,
-			ShowOutput: false,
+			Name:        "Pull default branch",
+			Description: "Pull latest from origin's default branch",
+			Command:     "git pull origin $(git symbolic-ref refs/remotes/origin/HEAD 2>/dev/null | sed 's|refs/remotes/origin/||')",
+			Type:        TypeGitDirs,
+			ShowOutput:  false,
 		},
 	},
 }

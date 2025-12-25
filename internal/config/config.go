@@ -30,15 +30,15 @@ type Config struct {
 var defaultConfig = Config{
 	Commands: []Command{
 		{
-			Name:        "Show git branch",
-			Description: "Display current branch for each repository",
+			Name:        "Branch",
+			Description: "Show current branch for all repos",
 			Command:     "git rev-parse --abbrev-ref HEAD",
 			Type:        TypeGitDirs,
 			ShowOutput:  true,
 		},
 		{
-			Name:        "Pull default branch",
-			Description: "Pull latest from origin's default branch",
+			Name:        "Pull Main",
+			Description: "Pull main for all repos",
 			Command:     "git pull origin $(git symbolic-ref refs/remotes/origin/HEAD 2>/dev/null | sed 's|refs/remotes/origin/||')",
 			Type:        TypeGitDirs,
 			ShowOutput:  false,

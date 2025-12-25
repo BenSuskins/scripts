@@ -243,7 +243,9 @@ func (m Model) renderExecuting() string {
 		b.WriteString(fmt.Sprintf("%s %s\n", icon, DirStyle.Render(dirName)))
 		// Show error message on new line, indented and grey
 		if !r.Success && r.Message != "" {
-			b.WriteString(fmt.Sprintf("    %s\n", HelpStyle.Render(r.Message)))
+			for _, line := range strings.Split(strings.TrimSpace(r.Message), "\n") {
+				b.WriteString(fmt.Sprintf("    %s\n", HelpStyle.Render(line)))
+			}
 		}
 	}
 
@@ -277,7 +279,9 @@ func (m Model) renderResults() string {
 		b.WriteString(fmt.Sprintf("%s %s\n", icon, DirStyle.Render(dirName)))
 		// Show error message on new line, indented and grey
 		if !r.Success && r.Message != "" {
-			b.WriteString(fmt.Sprintf("    %s\n", HelpStyle.Render(r.Message)))
+			for _, line := range strings.Split(strings.TrimSpace(r.Message), "\n") {
+				b.WriteString(fmt.Sprintf("    %s\n", HelpStyle.Render(line)))
+			}
 		}
 	}
 

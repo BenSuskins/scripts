@@ -5,6 +5,13 @@ import (
 	"strings"
 )
 
+// OperationResult represents the result of a command operation
+type OperationResult struct {
+	Directory string
+	Success   bool
+	Message   string
+}
+
 // RunCommand executes a shell command in the specified directory
 func RunCommand(dir, command string) OperationResult {
 	cmd := exec.Command("sh", "-c", command)

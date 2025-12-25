@@ -68,7 +68,10 @@ type Model struct {
 }
 
 // Messages
-type gitDirsMsg struct{ dirs []string }
+type gitDirsMsg struct {
+	dirs []string
+	err  error
+}
 type singleResultMsg struct {
 	result core.OperationResult
 }
@@ -110,9 +113,12 @@ func (m Model) Init() tea.Cmd {
 func scanGitDirs() tea.Msg {
 	cwd, err := os.Getwd()
 	if err != nil {
-		return gitDirsMsg{dirs: []string{}}
+		return gitDirsMsg{err: err}
 	}
-	dirs, _ := core.FindGitDirectories(cwd)
+	dirs, err := core.FindGitDirectories(cwd)
+	if err != nil {
+		return gitDirsMsg{err: err}
+	}
 	return gitDirsMsg{dirs: dirs}
 }
 
@@ -228,35 +234,36 @@ func (m Model) View() string {
 	return ""
 }
 
+func renderResult(b *strings.Builder, r core.OperationResult) {
+	icon := SuccessStyle.Render("✓")
+	if !r.Success {
+		icon = ErrorStyle.Render("✗")
+	}
+	dirName := filepath.Base(r.Directory)
+	b.WriteString(fmt.Sprintf("%s %s\n", icon, DirStyle.Render(dirName)))
+	if !r.Success && r.Message != "" {
+		for _, line := range strings.Split(strings.TrimSpace(r.Message), "\n") {
+			b.WriteString(fmt.Sprintf("    %s\n", HelpStyle.Render(line)))
+		}
+	}
+}
+
 func (m Model) renderExecuting() string {
 	var b strings.Builder
 
 	b.WriteString(TitleStyle.Render(m.selectedCmd.Title()) + "\n\n")
 
-	// Show completed results
 	for _, r := range m.results {
-		icon := SuccessStyle.Render("✓")
-		if !r.Success {
-			icon = ErrorStyle.Render("✗")
-		}
-		dirName := filepath.Base(r.Directory)
-		b.WriteString(fmt.Sprintf("%s %s\n", icon, DirStyle.Render(dirName)))
-		// Show error message on new line, indented and grey
-		if !r.Success && r.Message != "" {
-			for _, line := range strings.Split(strings.TrimSpace(r.Message), "\n") {
-				b.WriteString(fmt.Sprintf("    %s\n", HelpStyle.Render(line)))
-			}
-		}
+		renderResult(&b, r)
 	}
 
-	// Show current repo with spinner (no pending list)
+	// Show current repo with spinner
 	if m.selectedCmd.CmdType() == config.TypeGitDirs {
 		if m.currentIdx < len(m.gitDirs) {
 			dirName := filepath.Base(m.gitDirs[m.currentIdx])
 			b.WriteString(fmt.Sprintf("%s %s\n", m.spinner.View(), dirName))
 		}
 	} else {
-		// Single command: just show spinner
 		b.WriteString(fmt.Sprintf("%s Running...\n", m.spinner.View()))
 	}
 
@@ -270,19 +277,10 @@ func (m Model) renderResults() string {
 
 	failCount := 0
 	for _, r := range m.results {
-		icon := SuccessStyle.Render("✓")
 		if !r.Success {
-			icon = ErrorStyle.Render("✗")
 			failCount++
 		}
-		dirName := filepath.Base(r.Directory)
-		b.WriteString(fmt.Sprintf("%s %s\n", icon, DirStyle.Render(dirName)))
-		// Show error message on new line, indented and grey
-		if !r.Success && r.Message != "" {
-			for _, line := range strings.Split(strings.TrimSpace(r.Message), "\n") {
-				b.WriteString(fmt.Sprintf("    %s\n", HelpStyle.Render(line)))
-			}
-		}
+		renderResult(&b, r)
 	}
 
 	// Summary line

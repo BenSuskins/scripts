@@ -37,26 +37,17 @@ func PullMain(repoPath string) OperationResult {
 	cmd := exec.Command("git", "-C", repoPath, "pull", "origin", "main")
 	output, err := cmd.CombinedOutput()
 
-	message := strings.TrimSpace(string(output))
-	if message == "" {
-		message = "Already up to date"
-	}
-	// Truncate long messages for compact display
-	if len(message) > 60 {
-		message = message[:57] + "..."
-	}
-
 	if err != nil {
 		return OperationResult{
 			Directory: repoPath,
 			Success:   false,
-			Message:   message,
+			Message:   strings.TrimSpace(string(output)),
 		}
 	}
 
 	return OperationResult{
 		Directory: repoPath,
 		Success:   true,
-		Message:   message,
+		Message:   "",
 	}
 }

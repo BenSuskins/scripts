@@ -42,8 +42,8 @@ func NewMenuList(cfg *config.Config, width, height int) list.Model {
 	items := NewMenuItems(cfg)
 	l := list.New(items, list.NewDefaultDelegate(), width, height)
 	l.Title = "Scripts"
-	l.SetShowStatusBar(false)
-	l.SetFilteringEnabled(false)
+	l.SetShowStatusBar(true)
+	l.SetFilteringEnabled(true)
 	l.SetShowHelp(true)
 	return l
 }

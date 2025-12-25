@@ -5,7 +5,9 @@
       "WebFetch(domain:github.com)",
       "Bash(go get:*)",
       "Bash(go mod tidy:*)",
-      "Bash(go build:*)"
+      "Bash(go build:*)",
+      "Bash(cat:*)",
+      "WebFetch(domain:raw.githubusercontent.com)"
     ]
   }
 }

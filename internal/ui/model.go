@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/charmbracelet/bubbles/key"
 	"github.com/charmbracelet/bubbles/list"
 	"github.com/charmbracelet/bubbles/spinner"
 	tea "github.com/charmbracelet/bubbletea"
@@ -13,6 +14,34 @@ import (
 	"suskins/scripts/internal/config"
 	"suskins/scripts/internal/core"
 )
+
+type listKeyMap struct {
+	toggleHelp       key.Binding
+	toggleStatusBar  key.Binding
+	togglePagination key.Binding
+	toggleTitle      key.Binding
+}
+
+func newListKeyMap() *listKeyMap {
+	return &listKeyMap{
+		toggleHelp: key.NewBinding(
+			key.WithKeys("H"),
+			key.WithHelp("H", "toggle help"),
+		),
+		toggleStatusBar: key.NewBinding(
+			key.WithKeys("S"),
+			key.WithHelp("S", "toggle status"),
+		),
+		togglePagination: key.NewBinding(
+			key.WithKeys("P"),
+			key.WithHelp("P", "toggle pagination"),
+		),
+		toggleTitle: key.NewBinding(
+			key.WithKeys("T"),
+			key.WithHelp("T", "toggle title"),
+		),
+	}
+}
 
 // AppState represents the current state of the application
 type AppState int
@@ -27,6 +56,8 @@ const (
 type Model struct {
 	state       AppState
 	menu        list.Model
+	keys        *listKeyMap
+	menuTitle   string
 	spinner     spinner.Model
 	results     []core.OperationResult
 	gitDirs     []string
@@ -48,12 +79,27 @@ func NewModel(cfg *config.Config) Model {
 	s.Spinner = spinner.Dot
 	s.Style = SpinnerStyle
 
+	keys := newListKeyMap()
+	menu := NewMenuList(cfg, 80, 20)
+	menuTitle := menu.Title
+
+	menu.AdditionalShortHelpKeys = func() []key.Binding {
+		return []key.Binding{
+			keys.toggleHelp,
+			keys.toggleStatusBar,
+			keys.togglePagination,
+			keys.toggleTitle,
+		}
+	}
+
 	return Model{
-		state:   StateMenu,
-		menu:    NewMenuList(cfg, 80, 20),
-		spinner: s,
-		width:   80,
-		height:  24,
+		state:     StateMenu,
+		menu:      menu,
+		keys:      keys,
+		menuTitle: menuTitle,
+		spinner:   s,
+		width:     80,
+		height:    24,
 	}
 }
 
@@ -107,6 +153,30 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			}
 			if m.state == StateResults {
 				return m, tea.Quit
+			}
+		case "H":
+			if m.state == StateMenu && !m.menu.SettingFilter() {
+				m.menu.SetShowHelp(!m.menu.ShowHelp())
+				return m, nil
+			}
+		case "S":
+			if m.state == StateMenu && !m.menu.SettingFilter() {
+				m.menu.SetShowStatusBar(!m.menu.ShowStatusBar())
+				return m, nil
+			}
+		case "P":
+			if m.state == StateMenu && !m.menu.SettingFilter() {
+				m.menu.SetShowPagination(!m.menu.ShowPagination())
+				return m, nil
+			}
+		case "T":
+			if m.state == StateMenu && !m.menu.SettingFilter() {
+				if m.menu.Title == "" {
+					m.menu.Title = m.menuTitle
+				} else {
+					m.menu.Title = ""
+				}
+				return m, nil
 			}
 		}
 	case tea.WindowSizeMsg:

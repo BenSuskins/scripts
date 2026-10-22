@@ -1,6 +1,10 @@
 # Scripts
 
-A terminal UI for running commands across multiple git repositories.
+> A terminal app for running commands across multiple Git repositories.
+
+## Overview
+
+Scripts provides an interactive terminal menu for running configured commands across Git repositories. It shows progress and command output as each repository is processed.
 
 ## Features
 
@@ -9,7 +13,15 @@ A terminal UI for running commands across multiple git repositories.
 - Sequential execution with real-time progress
 - Configurable commands via YAML
 
-## Installation
+## Getting Started
+
+### Prerequisites
+
+- Go
+
+### Installation
+
+Run this command from the repository root:
 
 ```shell
 go install ./cmd/scripts
@@ -65,6 +77,10 @@ commands:
 - `true` - Display command output inline (e.g., branch names)
 - `false` - Only show success/failure icons
 
+## Commands\n\nRun these commands from the repository root.\n\n## Commands
+
+Run these commands from the repository root.
+
 ## Development
 
 ```shell
@@ -76,3 +92,13 @@ make vet      # Run go vet
 make tidy     # Tidy dependencies
 make clean    # Remove binary
 ```
+
+
+## Security
+
+See [SECURITY.md](SECURITY.md) for vulnerability reporting.
+
+
+## License
+
+No license file is present. All rights remain with the author.

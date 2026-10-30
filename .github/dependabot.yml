@@ -1,0 +1,16 @@
+version: 2
+updates:
+  - package-ecosystem: "gomod"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 5
+    commit-message:
+      prefix: "chore(deps-scripts)"
+    labels:
+      - "dependencies"
+    groups:
+      scripts-minor:
+        update-types:
+          - "minor"
+          - "patch"
